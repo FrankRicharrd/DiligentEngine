@@ -1,7 +1,7 @@
 
 #include "SamplePlugin.h"
 #include "GraphicsUtilities.h"
-#include "MapHelper.h"
+#include "MapHelper.hpp"
 
 using namespace Diligent;
 
@@ -43,7 +43,9 @@ SamplePlugin::SamplePlugin(Diligent::IRenderDevice *pDevice, bool UseReverseZ, T
 {
     auto deviceType = pDevice->GetDeviceCaps().DevType;
     {
-        PipelineStateDesc PSODesc;
+        PipelineStateCreateInfo PSOCreateInfo;
+        PipelineStateDesc&      PSODesc = PSOCreateInfo.PSODesc;
+
         PSODesc.IsComputePipeline = false;
         PSODesc.Name = "Render sample cube PSO";
         PSODesc.GraphicsPipeline.NumRenderTargets = 1;
@@ -51,7 +53,7 @@ SamplePlugin::SamplePlugin(Diligent::IRenderDevice *pDevice, bool UseReverseZ, T
         PSODesc.GraphicsPipeline.DSVFormat = DSVFormat;
         PSODesc.GraphicsPipeline.PrimitiveTopology = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         PSODesc.GraphicsPipeline.RasterizerDesc.CullMode = CULL_MODE_BACK;
-        PSODesc.GraphicsPipeline.RasterizerDesc.FrontCounterClockwise = deviceType == DeviceType::D3D11 || deviceType == DeviceType::D3D12 ? true : false;
+        PSODesc.GraphicsPipeline.RasterizerDesc.FrontCounterClockwise = deviceType == RENDER_DEVICE_TYPE_D3D11 || deviceType == RENDER_DEVICE_TYPE_D3D12 ? true : false;
         PSODesc.GraphicsPipeline.DepthStencilDesc.DepthFunc = UseReverseZ ? COMPARISON_FUNC_GREATER_EQUAL : COMPARISON_FUNC_LESS_EQUAL;
 
         PSODesc.GraphicsPipeline.BlendDesc.RenderTargets[0].BlendEnable = True;
@@ -95,7 +97,7 @@ SamplePlugin::SamplePlugin(Diligent::IRenderDevice *pDevice, bool UseReverseZ, T
         PSODesc.GraphicsPipeline.pPS = pPS;
         PSODesc.GraphicsPipeline.InputLayout.LayoutElements = LayoutElems;
         PSODesc.GraphicsPipeline.InputLayout.NumElements    = _countof(LayoutElems);
-        pDevice->CreatePipelineState(PSODesc, &m_PSO);
+        pDevice->CreatePipelineState(PSOCreateInfo, &m_PSO);
         m_PSO->GetStaticVariableByName(SHADER_TYPE_VERTEX, "Constants")->Set(m_VSConstants);
         m_PSO->CreateShaderResourceBinding(&m_SRB, true);
     }
